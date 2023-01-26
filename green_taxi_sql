@@ -1,0 +1,40 @@
+--How many taxi trips were totally made on January 15?
+select count(1)
+from green_taxi_data
+where cast(lpep_pickup_datetime as date) ='2019-01-15'
+and cast(lpep_dropoff_datetime as date) ='2019-01-15'
+;
+-- Answer: 20530
+
+--Which was the day with the largest trip distance?
+select lpep_pickup_datetime, trip_distance
+from green_taxi_data
+where trip_distance = (select max(trip_distance) from green_taxi_data)
+;
+--Answer: 2019-01-15
+
+--In 2019-01-01 how many trips had 2 and 3 passengers?
+SELECT PASSENGER_COUNT, COUNT(1)
+FROM GREEN_TAXI_DATA
+WHERE cast(lpep_pickup_datetime as date) ='2019-01-01'
+-- and cast(lpep_dropoff_datetime as date) ='2019-01-01'
+AND PASSENGER_COUNT IN (2,3)
+GROUP BY 1
+;
+-- Answer: 2:1282; 3:254
+
+--For the passengers picked up in the Astoria Zone which was the drop up zone that had the largest tip?
+with astoria_pu as (
+select *
+from green_taxi_data
+where "PULocationID" = (select "LocationID" from taxi_zone_lookup where "Zone" = 'Astoria')
+order by tip_amount desc	
+)
+select 
+t2."Zone"
+from astoria_pu t1
+	left join taxi_zone_lookup t2
+	on t1."DOLocationID" = t2."LocationID"
+limit 1
+;
+-- Answer: "Long Island City/Queens Plaza"
